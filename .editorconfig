@@ -1,0 +1,21 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# Java and XML: 4 spaces
+[*.{java,xml,xsd}]
+indent_size = 4
+
+# Trailing spaces are meaningful in Markdown (hard line breaks), so do not trim them
+[*.md]
+trim_trailing_whitespace = false
+
+# Windows batch files must use CRLF (consistent with .gitattributes)
+[*.{bat,cmd}]
+end_of_line = crlf

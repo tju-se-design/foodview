@@ -1,0 +1,38 @@
+# 只负责本地开发依赖：MySQL。
+# 后端、前端目前都在宿主机上直接跑（不容器化）。
+# 表结构一律走 Flyway 迁移，不要手动改库。
+#
+# 用法：
+#   docker compose up -d        启动
+#   docker compose logs -f mysql
+#   docker compose down         停止（保留数据）
+#   docker compose down -v      停止并删除数据
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: foodview-mysql
+    restart: unless-stopped
+    environment:
+      # 本地开发凭据，生产环境绝不照搬（见 CONVENTION.md）
+      MYSQL_ROOT_PASSWORD: foodview
+      MYSQL_DATABASE: foodview
+      MYSQL_USER: foodview
+      MYSQL_PASSWORD: foodview
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - foodview-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-pfoodview"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+volumes:
+  foodview-mysql-data:
+    name: foodview-mysql-data
