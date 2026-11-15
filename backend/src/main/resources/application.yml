@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: foodview-backend
+  profiles:
+    default: dev
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+mybatis-plus:
+  global-config:
+    db-config:
+      id-type: auto
