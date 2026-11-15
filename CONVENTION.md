@@ -97,7 +97,8 @@ was fetched separately. Closes #21.
 - 合并前要求：
   - 至少 **1 名成员 approve**；
   - 后端改动跑过 `cd backend && mvn -q -DskipTests compile`，前端改动跑过 `cd frontend && pnpm type-check && pnpm build:h5`；
-  - 涉及表结构的改动，从空库重放一遍迁移（`docker compose down -v && docker compose up -d` 后启动后端）。
+  - 涉及表结构的改动，从空库重放一遍迁移（`docker compose down -v && docker compose up -d` 后启动后端）；
+  - CI（`.github/workflows/ci.yml`）两个 job 全绿：`backend` 跑 `./mvnw -B verify`，`frontend` 跑 `pnpm install --frozen-lockfile`、`type-check`、`build:h5`、`build:mp-weixin`。
 - 合并方式：**merge commit**（保留提交历史），不用 squash / rebase 合并。review 期间的修改直接在分支上追加 commit 或 force-push 均可，合并前不强制整理历史。
 - 合并后删除功能分支；PR 描述或 commit footer 用 `Closes #N` 关联 issue。
 - PR 保持小而聚焦，大改动拆成多个 PR。

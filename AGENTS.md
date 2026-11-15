@@ -96,6 +96,7 @@ was fetched separately. Closes #21.
   - At least one team member approves.
   - Backend changes pass `cd backend && mvn -q -DskipTests compile`; frontend changes pass `cd frontend && pnpm type-check && pnpm build:h5`.
   - Changes that touch table structure replay the migrations from an empty database (`docker compose down -v && docker compose up -d`, then start the backend).
+  - Both jobs in `.github/workflows/ci.yml` pass: `backend` runs `./mvnw -B verify`, `frontend` runs `pnpm install --frozen-lockfile`, `type-check`, `build:h5` and `build:mp-weixin`.
 - Merge with a merge commit to keep the history. Squash and rebase merges are out.
 - Follow-up commits on the branch during review are fine, and force-pushing is fine. History does not need tidying before merge.
 - Delete the branch after merging. Link the issue with `Closes #N` in the pull request description or a commit footer.
