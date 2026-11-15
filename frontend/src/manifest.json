@@ -1,0 +1,19 @@
+{
+    "name" : "食见 FoodView",
+    "appid" : "",
+    "description" : "校园餐饮信息服务平台",
+    "versionName" : "0.1.0",
+    "versionCode" : "100",
+    "transformPx" : false,
+    "mp-weixin" : {
+        "appid" : "",
+        "setting" : {
+            "urlCheck" : false
+        },
+        "usingComponents" : true
+    },
+    "uniStatistics": {
+        "enable": false
+    },
+    "vueVersion" : "3"
+}

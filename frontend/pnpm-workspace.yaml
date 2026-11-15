@@ -1,0 +1,10 @@
+# pnpm 12 的设置从本文件读，不再读 .npmrc。
+# allowBuilds 放行 uni-app 工具链需要跑 postinstall 的三个包；删掉会报 ERR_PNPM_IGNORED_BUILDS。
+allowBuilds:
+  core-js: true
+  core-js-pure: true
+  esbuild: true
+
+# uni-app 的 rollup 解析不跟随符号链接，pnpm 默认的 isolated 布局会让 pinia 的
+# 传递依赖（@vue/devtools-api）解析失败，所以用扁平布局。
+nodeLinker: hoisted
