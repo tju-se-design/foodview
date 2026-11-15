@@ -1,0 +1,62 @@
+name: 缺陷
+description: 可复现的问题：页面报错、接口错误、构建失败、数据不对
+title: "[缺陷] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交前看一眼 [CONVENTION.md](https://github.com/tju-se-design/foodview/blob/main/CONVENTION.md) 第 8 节，确认这不是已明确推迟、还没做的事项。
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 影响范围
+      options:
+        - 后端 Spring Boot
+        - 前端 H5
+        - 微信小程序
+        - 数据库 / 迁移
+        - CI 流水线
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 实际现象
+      description: 报错信息要贴完整的堆栈或接口响应，不要只写“报错了”
+      placeholder: |
+        POST /api/shops 返回 500，body 为 {"code":500,"message":"服务异常","data":null}
+        后端日志：
+        java.lang.NullPointerException: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. docker compose up -d
+        2. cd backend && mvn spring-boot:run
+        3. curl -X POST localhost:8080/api/shops -d '...'
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为
+      description: 你认为应该发生什么，或者原本能用的版本是什么
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: 环境（可选）
+      description: 分支或 commit、浏览器、机型、是否在容器里跑
+      placeholder: main @ 42603bd，Chrome 141，Android 微信
+    validations:
+      required: false
