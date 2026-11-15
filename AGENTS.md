@@ -23,13 +23,13 @@ FoodView is a split frontend and backend web application. `frontend/` is one uni
 │   ├── mvnw, mvnw.cmd              Maven wrapper
 │   └── pom.xml
 ├── frontend/                       uni-app project for H5 and WeChat mini program
-│   ├── src/pages/                  Pages, registered in pages.json
+│   ├── src/pages/                  Pages, registered in src/pages.json
 │   ├── src/api/                    Request functions grouped by domain
 │   ├── src/request/                Request wrapper shared by H5 and the mini program
-│   ├── src/stores/                 Pinia
-│   ├── pages.json                  Routes, tabBar, subpackages
-│   ├── manifest.json               Per-platform config including the WeChat appid
-│   └── pnpm-workspace.yaml         Dependency build allowlist required by pnpm 12, do not delete
+│   ├── src/pages.json              Routes, tabBar, subpackages
+│   ├── src/manifest.json           Per-platform config including the WeChat appid
+│   ├── vite.config.ts              The /api proxy used during H5 development
+│   └── pnpm-workspace.yaml         Every pnpm 12 setting: dependency build allowlist and nodeLinker
 ├── docker-compose.yml              Local MySQL 8.4
 ├── .editorconfig                   Editor rules enforced by tooling
 ├── .gitattributes                  Line-ending rules enforced by tooling
@@ -46,7 +46,7 @@ FoodView is a split frontend and backend web application. `frontend/` is one uni
 ## 2. Development environment
 
 - JDK 25 and Maven 3.10. Maven is the only build tool here; do not introduce Gradle. The repo ships a wrapper, so use `mvn` when Maven is installed and `./mvnw` when it is not; both are 3.10.
-- Node 26 with pnpm 12. pnpm 12 blocks dependency postinstall scripts, so the allowlist lives under `allowBuilds:` in `frontend/pnpm-workspace.yaml`. That key replaces the older `onlyBuiltDependencies`; removing it makes `pnpm install` fail with `ERR_PNPM_IGNORED_BUILDS`.
+- Node 26 with pnpm 12. pnpm 12 reads its settings only from `frontend/pnpm-workspace.yaml`, no longer from `.npmrc`. Two entries in that file are load-bearing. `allowBuilds` lets dependencies run postinstall scripts, without it `pnpm install` fails with `ERR_PNPM_IGNORED_BUILDS`. `nodeLinker: hoisted` asks for a flat `node_modules`, because the isolated layout hides pinia's transitive dependencies from uni-app's rollup resolver and `pnpm build:h5` fails.
 - Docker and Docker Compose. MySQL runs in a container and nowhere else. The Docker daemon must already be running (`docker info` succeeds), otherwise every compose command fails outright.
 - Application processes stay out of containers: run the backend with `mvn spring-boot:run` and the frontend through the Vite dev server. The reasoning is in section 8.
 
@@ -60,7 +60,9 @@ FoodView is a split frontend and backend web application. `frontend/` is one uni
 | `cd frontend && pnpm install` | Install frontend dependencies |
 | `cd frontend && pnpm dev:h5` | H5 dev server on 5173, `/api` already proxied to 8080 |
 | `cd frontend && pnpm dev:mp-weixin` | Mini program build, open `dist/dev/mp-weixin` in WeChat DevTools |
-| `cd frontend && pnpm build:h5` | Frontend smoke check, run before committing |
+| `cd frontend && pnpm type-check` | vue-tsc type check |
+| `cd frontend && pnpm build:h5` | Frontend smoke check, run alongside type-check before committing |
+| `cd frontend && pnpm build:mp-weixin` | Mini program production build, output in `dist/build/mp-weixin` |
 
 Run `git diff --check` before committing to catch whitespace and line-ending problems.
 
@@ -92,7 +94,7 @@ was fetched separately. Closes #21.
 - Use the Conventional Commit format for the title. The description states the motivation, what changed, and how you verified it (commands run, what you exercised by hand). Add a screenshot or recording for UI changes.
 - Before merging:
   - At least one team member approves.
-  - Backend changes pass `cd backend && mvn -q -DskipTests compile`; frontend changes pass `cd frontend && pnpm build:h5`.
+  - Backend changes pass `cd backend && mvn -q -DskipTests compile`; frontend changes pass `cd frontend && pnpm type-check && pnpm build:h5`.
   - Changes that touch table structure replay the migrations from an empty database (`docker compose down -v && docker compose up -d`, then start the backend).
 - Merge with a merge commit to keep the history. Squash and rebase merges are out.
 - Follow-up commits on the branch during review are fine, and force-pushing is fine. History does not need tidying before merge.
@@ -154,9 +156,10 @@ was fetched separately. Closes #21.
 - The base is the official uni-app `vite-ts` template. The versions of `@dcloudio/*`, `vite`, `typescript` and `vue-tsc` form a locked set, so never upgrade one of them alone. Switch the whole template version instead.
 - Keep only the H5 and WeChat mini program platforms and their `dev:` / `build:` scripts. Discuss any other platform (App, Alipay mini program, and the rest) in an issue before adding it back.
 - No `window`, `document` or DOM API in mini program code. Handle per-platform differences with conditional compilation (`// #ifdef H5`, `// #ifdef MP-WEIXIN`). Use `rpx` for layout units and `@media` breakpoints for wide PC screens.
-- Requests go through `src/request/` only. Pages never call `uni.request` or `axios` directly. H5 proxies `/api` to port 8080 through Vite, and the backend hostname never appears in frontend code.
-- State lives in Pinia (`src/stores/`). Page-local state stays in the page.
-- Style with SCSS and the `uni.scss` variables. No UI component library and no atomic CSS for now (see section 8).
+- Requests go through `src/request/` only. Pages never call `uni.request` or `axios` directly. H5 uses the relative path `/api`, which Vite proxies to port 8080, so the backend hostname never appears in frontend code. The mini program has no proxy: `request` falls back to `VITE_API_BASE`, `http://localhost:8080/api` by default, and a real device needs an HTTPS domain that is registered and filed.
+- State uses Pinia, registered in `src/main.ts`. Stores will live in `src/stores/`; there are none yet.
+- Style with plain CSS for now. The `uni.scss` variables need `sass` installed, so add that dependency when nesting or theming is actually needed. No UI component library and no atomic CSS (see section 8).
+- Conditional compilation comments work in `.ts` too, but `vue-tsc` sees the unprocessed source: never declare the same `const` in both an `#ifdef` and an `#ifndef` branch. Use `let` with a conditional assignment instead, or the type check fails on a duplicate declaration.
 - The WeChat mini program main package is capped at 2MB, so images come from a CDN or remote URL and extra pages go into `subPackages`.
 
 ## 8. Deferred decisions
@@ -170,6 +173,6 @@ Every item below is postponed on purpose. Update this table before writing the c
 | Redis | Not wired | No dependency yet |
 | Object storage for uploads | Undecided | Not even local disk storage until uploading is a real requirement |
 | API docs and frontend type generation | Not wired | springdoc plus `openapi-typescript` is the candidate |
-| UI component library, UnoCSS | Not added | SCSS only |
-| Frontend test framework | Not added | `pnpm build:h5` plus manual checks |
+| UI component library, UnoCSS, `sass` | Not added | Plain CSS only |
+| Frontend test framework | Not added | `pnpm type-check`, `pnpm build:h5` and manual checks |
 | Containerised deployment | Postponed | Applications stay out of containers while developing; add `backend/Dockerfile` and `docker-compose.prod.yml` (nginx serving `frontend/dist`) once there is a server |

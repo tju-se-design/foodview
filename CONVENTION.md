@@ -23,13 +23,13 @@
 │   ├── mvnw / mvnw.cmd             Maven wrapper
 │   └── pom.xml
 ├── frontend/                       uni-app 工程，H5 与微信小程序
-│   ├── src/pages/                  页面，在 pages.json 注册
+│   ├── src/pages/                  页面，在 src/pages.json 注册
 │   ├── src/api/                    按领域拆的请求函数
 │   ├── src/request/                H5 与小程序共用的请求封装
-│   ├── src/stores/                 Pinia
-│   ├── pages.json                  路由、tabBar、分包
-│   ├── manifest.json               微信 appid 等分端配置
-│   └── pnpm-workspace.yaml         pnpm 12 的依赖构建白名单，不要删
+│   ├── src/pages.json              路由、tabBar、分包
+│   ├── src/manifest.json           微信 appid 等分端配置
+│   ├── vite.config.ts              H5 开发时的 /api 代理
+│   └── pnpm-workspace.yaml         pnpm 12 的全部设置：依赖构建白名单与 nodeLinker
 ├── docker-compose.yml              本地 MySQL 8.4
 ├── .editorconfig                   编辑格式规则（机器强制）
 ├── .gitattributes                  换行规则（机器强制）
@@ -46,7 +46,7 @@
 ## 2. 开发环境
 
 - JDK 25，Maven 3.10，构建只用 Maven，不引入 Gradle。仓库自带 wrapper，装了 Maven 用 `mvn`，没装就用 `./mvnw`，两者都是 3.10。
-- Node 26 + pnpm 12。pnpm 12 会拦截依赖的 postinstall 脚本，白名单写在 `frontend/pnpm-workspace.yaml` 的 `allowBuilds:` 里；这个键取代了旧的 `onlyBuiltDependencies`，删掉它会导致 `pnpm install` 报 `ERR_PNPM_IGNORED_BUILDS`。
+- Node 26 + pnpm 12。pnpm 12 只从 `frontend/pnpm-workspace.yaml` 读设置，不再读 `.npmrc`。其中两项都不能删：`allowBuilds` 放行依赖的 postinstall（否则 `pnpm install` 报 `ERR_PNPM_IGNORED_BUILDS`），`nodeLinker: hoisted` 换成扁平 node_modules（isolated 布局下 uni-app 的 rollup 解析不到 pinia 的传递依赖，`pnpm build:h5` 会失败）。
 - Docker 与 Docker Compose，MySQL 只跑在容器里。Docker daemon 必须已经启动（`docker info` 能通），否则 compose 命令会直接失败。
 - 应用进程不进容器：后端用 `mvn spring-boot:run`，前端用 Vite dev server。理由见第 8 节。
 
@@ -60,7 +60,9 @@
 | `cd frontend && pnpm install` | 安装前端依赖 |
 | `cd frontend && pnpm dev:h5` | H5 开发服务器，5173，`/api` 已代理到 8080 |
 | `cd frontend && pnpm dev:mp-weixin` | 小程序产物，用微信开发者工具打开 `dist/dev/mp-weixin` |
-| `cd frontend && pnpm build:h5` | 前端最小验证，提交前跑 |
+| `cd frontend && pnpm type-check` | vue-tsc 类型检查 |
+| `cd frontend && pnpm build:h5` | 前端最小验证，提交前跟 type-check 一起跑 |
+| `cd frontend && pnpm build:mp-weixin` | 小程序生产构建，产物在 `dist/build/mp-weixin` |
 
 提交前用 `git diff --check` 自查空白与换行问题。
 
@@ -94,7 +96,7 @@ was fetched separately. Closes #21.
 - 标题沿用 Conventional Commit 格式；描述至少写清：**动机（为什么）**、**改动内容**、**验证方式**（跑了哪些命令、手测了什么）。UI 改动附截图或录屏。
 - 合并前要求：
   - 至少 **1 名成员 approve**；
-  - 后端改动跑过 `cd backend && mvn -q -DskipTests compile`，前端改动跑过 `cd frontend && pnpm build:h5`；
+  - 后端改动跑过 `cd backend && mvn -q -DskipTests compile`，前端改动跑过 `cd frontend && pnpm type-check && pnpm build:h5`；
   - 涉及表结构的改动，从空库重放一遍迁移（`docker compose down -v && docker compose up -d` 后启动后端）。
 - 合并方式：**merge commit**（保留提交历史），不用 squash / rebase 合并。review 期间的修改直接在分支上追加 commit 或 force-push 均可，合并前不强制整理历史。
 - 合并后删除功能分支；PR 描述或 commit footer 用 `Closes #N` 关联 issue。
@@ -155,9 +157,10 @@ was fetched separately. Closes #21.
 - 底座是 uni-app 官方 `vite-ts` 模板。`@dcloudio/*`、`vite`、`typescript`、`vue-tsc` 的版本是模板锁定的组合，**不许单独升级其中任何一个**，要升就整体切换到新的模板版本。
 - 只保留 H5 与微信小程序两个平台及其 `dev:` / `build:` 脚本。要加别的端（App、支付宝小程序等）先在 issue 里讨论，别顺手装回来。
 - 小程序端不许出现 `window` / `document` / DOM API，分端差异用条件编译（`// #ifdef H5`、`// #ifdef MP-WEIXIN`）。布局单位优先 `rpx`，适配 PC 宽屏用 `@media` 断点。
-- 请求只走 `src/request/`，页面里不直接调 `uni.request` 或 `axios`。H5 通过 Vite 代理把 `/api` 转发到 8080，代码里不出现后端域名。
-- 状态只放 Pinia（`src/stores/`），页面内部状态不外提。
-- 样式用 SCSS 加 `uni.scss` 变量，暂不引入 UI 组件库与原子化 CSS（见第 8 节）。
+- 请求只走 `src/request/`，页面里不直接调 `uni.request` 或 `axios`。H5 用相对路径 `/api`，由 Vite 代理转发到 8080，代码里不出现后端域名；小程序端没有代理，`request` 会退回 `VITE_API_BASE`，本地默认 `http://localhost:8080/api`，真机必须换成备案过的 HTTPS 域名。
+- 状态用 Pinia，已在 `src/main.ts` 注册，store 以后放 `src/stores/`，现在还没有。
+- 样式先用普通 CSS。`uni.scss` 里的变量要装了 `sass` 才可用，等真需要嵌套或主题变量时再加这个依赖。暂不引入 UI 组件库与原子化 CSS（见第 8 节）。
+- 条件编译注释在 `.ts` 里同样生效，但 `vue-tsc` 看到的是未处理的源码：不要用 `#ifdef` / `#ifndef` 两个分支各写一个同名 `const`，改成 `let` 加条件赋值，否则类型检查报重复声明。
 - 微信小程序主包上限 2MB，图片走 CDN 或外链，页面多了用 `subPackages` 分包。
 
 ## 8. 明确推迟的决定
@@ -171,6 +174,6 @@ was fetched separately. Closes #21.
 | Redis | 未接入 | 先不加依赖 |
 | 对象存储（图片上传） | 未选型 | 本地先落磁盘也不做，等有上传需求 |
 | 接口文档与前端类型生成 | 未接入 | springdoc + `openapi-typescript` 是候选方案 |
-| UI 组件库、UnoCSS | 未引入 | 样式用 SCSS |
-| 前端测试框架 | 未引入 | 以 `pnpm build:h5` 与手测为准 |
+| UI 组件库、UnoCSS、`sass` | 未引入 | 样式用普通 CSS |
+| 前端测试框架 | 未引入 | 以 `pnpm type-check`、`pnpm build:h5` 与手测为准 |
 | 应用容器化部署 | 推迟 | 开发期应用不进容器；等有服务器再补 `backend/Dockerfile` 与 `docker-compose.prod.yml`（nginx 托管 `frontend/dist`） |
