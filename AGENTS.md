@@ -70,7 +70,7 @@ Run `git diff --check` before committing to catch whitespace and line-ending pro
 
 ### 3.1 Branches (main and feature branches only)
 
-- `main` is the stable branch and always runs. It takes changes through pull requests only, never direct pushes.
+- `main` is the stable branch and always runs. It takes changes through pull requests only; a direct push is rejected by the repository ruleset (`push declined due to repository rule violations`).
 - `feat/<name>` is a feature branch cut from `main` and deleted as soon as its pull request lands. Use `fix/<name>` for a pure bug fix.
 - Name branches with a short English kebab-case phrase, for example `feat/shop-list` or `fix/mp-login-loop`.
 - One branch carries one thing, a single feature or a single fix. Merge it when it is done.
@@ -93,11 +93,11 @@ was fetched separately. Closes #21.
 
 - Use the Conventional Commit format for the title. The description states the motivation, what changed, and how you verified it (commands run, what you exercised by hand). Add a screenshot or recording for UI changes.
 - Before merging:
-  - At least one team member approves.
+  - The repository ruleset requires a pull request and both the `backend` and `frontend` checks. The approval count is currently 0, so you can merge your own pull request; raise it in the ruleset rather than in this file if you want enforced review.
   - Backend changes pass `cd backend && mvn -q -DskipTests compile`; frontend changes pass `cd frontend && pnpm type-check && pnpm build:h5`.
   - Changes that touch table structure replay the migrations from an empty database (`docker compose down -v && docker compose up -d`, then start the backend).
   - Both jobs in `.github/workflows/ci.yml` pass: `backend` runs `./mvnw -B verify`, `frontend` runs `pnpm install --frozen-lockfile`, `type-check`, `build:h5` and `build:mp-weixin`.
-- Merge with a merge commit to keep the history. Squash and rebase merges are out.
+- Merge with a merge commit to keep the history. The ruleset allows that method only, so squash and rebase merges are rejected.
 - Follow-up commits on the branch during review are fine, and force-pushing is fine. History does not need tidying before merge.
 - Delete the branch after merging. Link the issue with `Closes #N` in the pull request description or a commit footer.
 - Keep pull requests small and focused. Split large work into several.
