@@ -70,7 +70,7 @@
 
 ### 3.1 分支模型（只有 main 和功能分支）
 
-- `main`：稳定分支，任何时候都能跑起来。只接受 PR 合入，不直接 push。
+- `main`：稳定分支，任何时候都能跑起来。只接受 PR 合入，直推会被 GitHub 规则集拒绝（`push declined due to repository rule violations`）。
 - `feat/<名称>`：功能分支，从 main 拉出，PR 合回 main 后**立即删除**。纯缺陷修复用 `fix/<名称>`。
 - 命名用 kebab-case 英文短语，如 `feat/shop-list`、`fix/mp-login-loop`。
 - 一个分支只承载一件事（一个功能或一个修复），做完即合，不长期挂账。
@@ -95,11 +95,11 @@ was fetched separately. Closes #21.
 
 - 标题沿用 Conventional Commit 格式；描述至少写清：**动机（为什么）**、**改动内容**、**验证方式**（跑了哪些命令、手测了什么）。UI 改动附截图或录屏。
 - 合并前要求：
-  - 至少 **1 名成员 approve**；
+  - GitHub 规则集要求 PR，且 `backend` 与 `frontend` 两个 check 必须通过。approve 数量当前设为 0，可以自己合自己的 PR；想强制 review 就改规则集，别只改这份文档；
   - 后端改动跑过 `cd backend && mvn -q -DskipTests compile`，前端改动跑过 `cd frontend && pnpm type-check && pnpm build:h5`；
   - 涉及表结构的改动，从空库重放一遍迁移（`docker compose down -v && docker compose up -d` 后启动后端）；
   - CI（`.github/workflows/ci.yml`）两个 job 全绿：`backend` 跑 `./mvnw -B verify`，`frontend` 跑 `pnpm install --frozen-lockfile`、`type-check`、`build:h5`、`build:mp-weixin`。
-- 合并方式：**merge commit**（保留提交历史），不用 squash / rebase 合并。review 期间的修改直接在分支上追加 commit 或 force-push 均可，合并前不强制整理历史。
+- 合并方式：**merge commit**（保留提交历史），规则集只允许这一种，squash 与 rebase 会被拒绝。review 期间的修改直接在分支上追加 commit 或 force-push 均可，合并前不强制整理历史。
 - 合并后删除功能分支；PR 描述或 commit footer 用 `Closes #N` 关联 issue。
 - PR 保持小而聚焦，大改动拆成多个 PR。
 
