@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 工程约定（目录、Git、编码、明确推迟的决定）
+    url: https://github.com/tju-se-design/foodview/blob/main/CONVENTION.md
+    about: 提 issue 前先确认它不是已经推迟的事项
+  - name: 产品背景与功能规划
+    url: https://github.com/tju-se-design/foodview/blob/main/README.md
+    about: 确认这个功能是否已在规划里

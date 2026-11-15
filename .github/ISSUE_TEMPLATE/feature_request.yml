@@ -1,0 +1,47 @@
+name: 功能需求
+description: 新增功能，或对现有功能的改动
+title: "[需求] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        先看 [README.md](https://github.com/tju-se-design/foodview/blob/main/README.md) 的功能章节：已在规划里的，写清楚还差哪一块；不在规划里的，说明为什么要加。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 要解决的问题
+      description: 谁在什么场景下遇到什么麻烦，现在的做法是什么
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 期望的做法
+      description: 界面或接口大致长什么样，有替代方案也一并写
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 涉及的范围
+      multiple: true
+      options:
+        - 后端 Spring Boot
+        - 前端 H5
+        - 微信小程序
+        - 数据库表结构
+        - 暂不确定
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 补充信息（可选）
+      description: 截图、参考产品、需要新依赖、会影响已有接口等
+    validations:
+      required: false
