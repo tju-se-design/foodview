@@ -1,0 +1,13 @@
+@startuml UC-500
+skinparam defaultFontName "Noto Sans CJK SC"
+left to right direction
+skinparam packageStyle rectangle
+
+actor 访客 as Visitor
+
+rectangle "访客就餐参考" {
+  usecase "UC-501 查看食堂概况" as UC501
+}
+
+Visitor --> UC501
+@enduml
