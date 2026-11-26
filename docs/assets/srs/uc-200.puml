@@ -1,0 +1,40 @@
+@startuml UC-200
+skinparam defaultFontName "Noto Sans CJK SC"
+left to right direction
+skinparam packageStyle rectangle
+
+actor 学生 as Student
+actor 档口员工 as Staff
+actor 食堂管理员 as CanteenAdmin
+actor 校方管理员 as SchoolAdmin
+actor 平台运营 as Ops
+
+rectangle "结构化反馈" {
+  usecase "UC-201 提交五维评价" as UC201
+  usecase "UC-202 编辑/删除自己的评价" as UC202
+  usecase "UC-203 查看反馈处理状态" as UC203
+  usecase "UC-204 受理/处理/回复反馈" as UC204
+  usecase "UC-205 拒绝反馈" as UC205
+  usecase "UC-206 督办催办" as UC206
+  usecase "UC-207 举报与内容审核" as UC207
+  usecase "UC-208 附图评价" as UC208
+}
+
+Student --> UC201
+Student --> UC202
+Student --> UC203
+Student --> UC207
+Student --> UC208
+Staff --> UC204
+CanteenAdmin --> UC204
+CanteenAdmin --> UC205
+SchoolAdmin --> UC206
+Ops --> UC207
+
+actor "通知服务" as Notify
+actor "对象存储服务" as ObjectStore
+
+UC204 --> Notify
+UC206 --> Notify
+UC208 --> ObjectStore
+@enduml

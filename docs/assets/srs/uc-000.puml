@@ -1,0 +1,80 @@
+@startuml UC-000
+left to right direction
+skinparam packageStyle rectangle
+skinparam defaultFontName "Noto Sans CJK SC"
+
+actor 访客 as Visitor
+actor 学生 as Student
+Student --|> Visitor
+actor 档口员工 as Staff
+actor 食堂管理员 as CanteenAdmin
+actor 校方管理员 as SchoolAdmin
+actor 平台运营 as Ops
+
+rectangle "食见 FoodView" {
+  package "菜品数字档案" as M1 {
+    usecase "UC-101 按菜名搜索" as UC101
+    usecase "UC-102 查看菜品详情" as UC102
+    usecase "UC-103 跨档口对比（P1）" as UC103
+    usecase "UC-104 更新供应状态与价格" as UC104
+    usecase "UC-105 维护档口信息与上下架" as UC105
+  }
+  package "结构化反馈" as M2 {
+    usecase "UC-201 提交五维评价" as UC201
+    usecase "UC-202 编辑/删除评价" as UC202
+    usecase "UC-203 查看反馈状态" as UC203
+    usecase "UC-204 受理/处理/回复" as UC204
+    usecase "UC-205 拒绝反馈" as UC205
+    usecase "UC-206 督办催办" as UC206
+    usecase "UC-207 举报与审核" as UC207
+    usecase "UC-208 附图评价（P1）" as UC208
+  }
+  package "菜单共创" as M3 {
+    usecase "UC-301 投想尝票/撤销" as UC301
+    usecase "UC-302 提交新品建议" as UC302
+    usecase "UC-303 审核新品建议" as UC303
+    usecase "UC-304 发起/管理试供" as UC304
+    usecase "UC-305 提交试供反馈" as UC305
+    usecase "UC-306 查看共创排名" as UC306
+    usecase "UC-307 确认转正" as UC307
+  }
+  package "食堂与校方数据" as M4 {
+    usecase "UC-401 查看聚合看板" as UC401
+    usecase "UC-402 价格变更历史" as UC402
+    usecase "UC-403 导出 CSV（P1）" as UC403
+  }
+  package "访客就餐参考" as M5 {
+    usecase "UC-501 查看食堂概况" as UC501
+  }
+  package "账号与内容管理" as M6 {
+    usecase "UC-601 微信授权登录" as UC601
+    usecase "UC-602 分配内部账号" as UC602
+    usecase "UC-603 争议菜品合并" as UC603
+  }
+}
+
+Visitor --> M1
+Visitor --> M3
+Visitor --> M5
+Student --> M2
+Student --> M6
+Staff --> M1
+Staff --> M2
+CanteenAdmin --> M1
+CanteenAdmin --> M2
+CanteenAdmin --> M3
+CanteenAdmin --> M4
+SchoolAdmin --> M2
+SchoolAdmin --> M4
+Ops --> M2
+Ops --> M3
+Ops --> M6
+
+actor "微信身份服务" as WechatAuth
+actor "通知服务" as Notify
+actor "对象存储服务" as ObjectStore
+
+M6 --> WechatAuth
+M2 --> Notify
+M2 --> ObjectStore
+@enduml

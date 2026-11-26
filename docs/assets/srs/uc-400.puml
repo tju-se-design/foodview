@@ -1,0 +1,21 @@
+@startuml UC-400
+skinparam defaultFontName "Noto Sans CJK SC"
+left to right direction
+skinparam packageStyle rectangle
+
+actor 食堂管理员 as CanteenAdmin
+actor 校方管理员 as SchoolAdmin
+
+rectangle "食堂与校方数据" {
+  usecase "UC-401 查看聚合看板" as UC401
+  usecase "UC-402 查看价格变更历史" as UC402
+  usecase "UC-403 导出 CSV" as UC403
+}
+
+CanteenAdmin --> UC401
+CanteenAdmin --> UC402
+CanteenAdmin --> UC403
+SchoolAdmin --> UC401
+SchoolAdmin --> UC402
+SchoolAdmin --> UC403
+@enduml

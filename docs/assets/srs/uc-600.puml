@@ -1,0 +1,21 @@
+@startuml UC-600
+skinparam defaultFontName "Noto Sans CJK SC"
+left to right direction
+skinparam packageStyle rectangle
+
+actor 学生 as Student
+actor 平台运营 as Ops
+
+rectangle "账号与内容管理" {
+  usecase "UC-601 微信授权登录" as UC601
+  usecase "UC-602 分配内部账号" as UC602
+  usecase "UC-603 争议菜品记录合并" as UC603
+}
+
+Student --> UC601
+Ops --> UC602
+Ops --> UC603
+
+actor "微信身份服务" as WechatAuth
+UC601 --> WechatAuth
+@enduml

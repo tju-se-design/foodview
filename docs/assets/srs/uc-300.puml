@@ -1,0 +1,29 @@
+@startuml UC-300
+skinparam defaultFontName "Noto Sans CJK SC"
+left to right direction
+skinparam packageStyle rectangle
+
+actor 访客 as Visitor
+actor 学生 as Student
+Student --|> Visitor
+actor 食堂管理员 as CanteenAdmin
+actor 平台运营 as Ops
+
+rectangle "菜单共创" {
+  usecase "UC-301 投想尝票/撤销" as UC301
+  usecase "UC-302 提交新品建议" as UC302
+  usecase "UC-303 审核新品建议" as UC303
+  usecase "UC-304 发起/管理试供" as UC304
+  usecase "UC-305 提交试供反馈" as UC305
+  usecase "UC-306 查看共创排名" as UC306
+  usecase "UC-307 确认转正" as UC307
+}
+
+Student --> UC301
+Student --> UC302
+Student --> UC305
+Visitor --> UC306
+Ops --> UC303
+CanteenAdmin --> UC304
+CanteenAdmin --> UC307
+@enduml

@@ -1,0 +1,26 @@
+@startuml UC-100
+skinparam defaultFontName "Noto Sans CJK SC"
+left to right direction
+skinparam packageStyle rectangle
+
+actor 访客 as Visitor
+actor 学生 as Student
+Student --|> Visitor
+actor 档口员工 as Staff
+actor 食堂管理员 as CanteenAdmin
+
+rectangle "菜品数字档案" {
+  usecase "UC-101 按菜名搜索" as UC101
+  usecase "UC-102 查看菜品详情" as UC102
+  usecase "UC-103 跨档口对比" as UC103
+  usecase "UC-104 更新供应状态与价格" as UC104
+  usecase "UC-105 维护档口信息与菜品上下架" as UC105
+}
+
+Visitor --> UC101
+Visitor --> UC102
+Visitor --> UC103
+Staff --> UC104
+CanteenAdmin --> UC104
+CanteenAdmin --> UC105
+@enduml
