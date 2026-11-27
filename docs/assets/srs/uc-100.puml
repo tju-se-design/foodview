@@ -23,4 +23,7 @@ Visitor --> UC103
 Staff --> UC104
 CanteenAdmin --> UC104
 CanteenAdmin --> UC105
+
+actor "通知服务" as Notify
+UC104 --> Notify
 @enduml

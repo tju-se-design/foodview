@@ -7,6 +7,7 @@ actor 访客 as Visitor
 actor 学生 as Student
 Student --|> Visitor
 actor 食堂管理员 as CanteenAdmin
+actor 校方管理员 as SchoolAdmin
 actor 平台运营 as Ops
 
 rectangle "菜单共创" {
@@ -25,5 +26,7 @@ Student --> UC305
 Visitor --> UC306
 Ops --> UC303
 CanteenAdmin --> UC304
+CanteenAdmin --> UC306
 CanteenAdmin --> UC307
+SchoolAdmin --> UC306
 @enduml
