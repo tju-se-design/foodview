@@ -65,6 +65,7 @@ CanteenAdmin --> M2
 CanteenAdmin --> M3
 CanteenAdmin --> M4
 SchoolAdmin --> M2
+SchoolAdmin --> M3
 SchoolAdmin --> M4
 Ops --> M2
 Ops --> M3
@@ -75,6 +76,7 @@ actor "通知服务" as Notify
 actor "对象存储服务" as ObjectStore
 
 M6 --> WechatAuth
+M1 --> Notify
 M2 --> Notify
 M2 --> ObjectStore
 @enduml
